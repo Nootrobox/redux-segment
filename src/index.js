@@ -12,7 +12,7 @@ function emit(type: string, fields: Array) {
 }
 
 function createTracker(options = {}) {
-  const mapper = Object.assign({}, { mapper : defaultMapper.mapper },  { mapper : options.mapper });
+  const mapper = Object.assign({}, defaultMapper.mapper, options.mapper);
   return store => next => action => handleAction(store.getState.bind(store), next, action, mapper);
 }
 
@@ -27,19 +27,19 @@ function appendAction(action: Object, analytics: Object) {
   return action;
 }
 
-function handleAction(getState: Function, next: Function, action: Object, options: Object) {
+function handleAction(getState: Function, next: Function, action: Object, mapper: Object) {
 
   if (action.meta && action.meta.analytics) return handleSpec(next, action);
 
-  if (typeof options.mapper[action.type] === 'function') {
+  if (typeof mapper[action.type] === 'function') {
 
-    let analytics = options.mapper[action.type](getState);
+    let analytics = mapper[action.type](getState);
     return handleSpec(next, appendAction(action, analytics));
   }
 
-  if (typeof options.mapper[action.type] === 'string') {
+  if (typeof mapper[action.type] === 'string') {
 
-    let analytics = {eventType: options.mapper[action.type]};
+    let analytics = {eventType: mapper[action.type]};
     return handleSpec(next, appendAction(action, analytics));
   }
 
